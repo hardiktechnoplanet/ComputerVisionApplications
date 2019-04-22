@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1212</width>
+    <height>644</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QCheckBox" name="displayImg_checkBox">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>60</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Display Image</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>80</y>
+      <width>561</width>
+      <height>491</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QGraphicsView" name="inputImage_graphicsView"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="inputImage_pushButton">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Select Input Image</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>48</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="input_lineEdit"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>80</y>
+      <width>561</width>
+      <height>491</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QGraphicsView" name="outputImage_graphicsView"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Location of the output image</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="output_lineEdit"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="filtering_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>10</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">JdkButton:hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4ro.png);
+}
+
+JdkButton:!hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton:pressed[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton[IsSelected=&quot;false&quot;][IsActive=&quot;false&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4in.png);
+}
+
+JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
+{
+	
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4se.png);
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Filtering</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="thresholding_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>10</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Thresholding</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="morphology_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>10</y>
+      <width>111</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Morphological 
+Transformations</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="templateMat_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>111</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Template 
+Matching</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mulTemplatemat_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>10</y>
+      <width>161</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Template Matching
+with Multiple Occurence</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="fDetection_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>10</y>
+      <width>91</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Feature
+Detection</string>
+    </property>
+   </widget>
+   <zorder>mulTemplatemat_pushButton</zorder>
+   <zorder>displayImg_checkBox</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>filtering_pushButton</zorder>
+   <zorder>thresholding_pushButton</zorder>
+   <zorder>morphology_pushButton</zorder>
+   <zorder>templateMat_pushButton</zorder>
+   <zorder>fDetection_pushButton</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1212</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_Image_Processing">
+    <property name="title">
+     <string>&amp;Image Processing</string>
+    </property>
+    <widget class="QMenu" name="menuFilters">
+     <property name="title">
+      <string>Filters</string>
+     </property>
+     <widget class="QMenu" name="menuEdge_Detection_img_derivatives">
+      <property name="title">
+       <string>Edge Detection (img derivatives)</string>
+      </property>
+      <addaction name="actionLaplacian"/>
+      <addaction name="separator"/>
+      <addaction name="actionScharr"/>
+      <addaction name="separator"/>
+      <addaction name="actionSobel"/>
+      <addaction name="separator"/>
+     </widget>
+     <addaction name="actionGaussian"/>
+     <addaction name="separator"/>
+     <addaction name="actionBlurr"/>
+     <addaction name="separator"/>
+     <addaction name="actionBilateral"/>
+     <addaction name="separator"/>
+     <addaction name="actionBox"/>
+     <addaction name="separator"/>
+     <addaction name="action2D_Filter"/>
+     <addaction name="separator"/>
+     <addaction name="actionEdge_Detection"/>
+     <addaction name="separator"/>
+     <addaction name="menuEdge_Detection_img_derivatives"/>
+    </widget>
+    <addaction name="menuFilters"/>
+   </widget>
+   <addaction name="menu_Image_Processing"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionGaussian">
+   <property name="text">
+    <string>Gaussian</string>
+   </property>
+  </action>
+  <action name="actionBlurr">
+   <property name="text">
+    <string>Blurr</string>
+   </property>
+  </action>
+  <action name="actionBilateral">
+   <property name="text">
+    <string>Bilateral</string>
+   </property>
+  </action>
+  <action name="actionBox">
+   <property name="text">
+    <string>Box</string>
+   </property>
+  </action>
+  <action name="action2D_Filter">
+   <property name="text">
+    <string>2D Filter (Image Sharpening)</string>
+   </property>
+  </action>
+  <action name="actionEdge_Detection">
+   <property name="text">
+    <string>Edge Detection</string>
+   </property>
+  </action>
+  <action name="actionLaplacian">
+   <property name="text">
+    <string>Laplacian</string>
+   </property>
+  </action>
+  <action name="actionScharr">
+   <property name="text">
+    <string>Scharr</string>
+   </property>
+  </action>
+  <action name="actionSobel">
+   <property name="text">
+    <string>Sobel</string>
+   </property>
+  </action>
+  <action name="actionSpatialGradient">
+   <property name="text">
+    <string>SpatialGradient</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
