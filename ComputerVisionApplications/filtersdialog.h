@@ -17,9 +17,27 @@ public:
 
 signals:
     void gauFilter_flag(bool);
+    void medianFilterSignal(bool);
+    void bilateralFilterSignal(bool);
+    void boxFilterSignal(bool);
+    void twoDFilterSignal(bool);
+    void edgeFilterSignal(bool);
+    void laplacianFilterSignal(bool);
 
 private slots:
     void on_gaussian_pushButton_clicked();
+
+    void on_median_pushButton_clicked();
+
+    void on_bilateral_pushButton_clicked();
+
+    void on_box_pushButton_clicked();
+
+    void on_twoD_pushButton_clicked();
+
+    void on_edge_pushButton_clicked();
+
+    void on_laplacian_pushButton_clicked();
 
 private:
     Ui::filtersDialog *ui;

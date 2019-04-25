@@ -8,13 +8,46 @@
 #include "thresholdingdialog.h" //thresholding header file
 #include "morphologydialog.h" //morphology header file
 #include "templatematchingdialog.h" //template matching header file
-#include "featuredetectordialog.h"
+#include "featuredetectordialog.h" //feature detector header file
+#include "extrctandmtchdialog.h" //extractor and matching header file
+#include "smoothdialog.h" //smoothing operator header file
+#include "pyramidsdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    //background image
+    //set the background JADAK image
+    QPixmap bkgnd("C:/Qt/Qt5.11.0/Projects/ISG/Test4_MedleyUcamDemo"
+                  "/Graphics/JadakBackground_old.png");
+    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, bkgnd);
+    this->setPalette(palette);
+
+    //stylesheet
+    qApp->setStyleSheet("QPushButton {background-color:white;"
+                        "border-style:outset;"
+                        "border-width:2px;"
+                        "border-radius:10px;"
+                        "border-color:beige;"
+                        "font:bold 10px;"
+                        "min-width: 5em;"
+                        "padding: 6px}");
+
+        /*background-color: red;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: beige;
+    font: bold 14px;
+    min-width: 10em;
+    padding: 6px;*/
+
+    //qApp->setStyleSheet("QPushButton { background-color: yellow }");
 
     //pushbutton filter flags
     mbGauFilter_flag=false;
@@ -29,6 +62,15 @@ MainWindow::MainWindow(QWidget *parent) :
     lapFilter_flag=false;
     scharrFilter_flag=false;
     sobelFilter_flag=false;
+    //smoothing flag
+    blurrSmooth_flag=false; gaussSmooth_flag=false;
+    bilatSmooth_flag=false, medSmooth_flag=false;
+    ui->smoothing_pushButton->setToolTip("usually done to reduce noise"
+                                      "or camera artifacts");
+    //pyramids
+    gauPyr_flag=false; lapPyr_flag=false;
+    ui->pyramid_pushButton->setToolTip("downsample or upsample the input"
+                                       "image");
     //thresholding
     thresholding_flag=false;
     Adpthresholding_flag=false;
@@ -46,7 +88,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //template matching
     templateMatching_flag=false;
     //feature detector
-    AGAST_flag=false;
+    AGAST_flag=false; BRISK_flag=false;
+    //extract and matching
+    extractAndMatch_flag=false;
+    //edge detection
+    ui->edgeDet_pushButton->setToolTip("canny edge detector");
 }
 
 MainWindow::~MainWindow()
@@ -212,7 +258,124 @@ void MainWindow::img_filtering()
     }
 
 }
+//smoothing
+void MainWindow::img_smoothing()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat inpImg, outImg;
 
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+
+        //Gaussian filter
+        if(gaussSmooth_flag)
+        {
+            /*src,dst,ksize,sigmaX,sigmaY
+             * sigmaX=Gaussian kernel standard deviation in
+             * X direction.
+             * sigmaY=Gaussian kernel standard deviation in
+             * Y direction.
+            */
+            GaussianBlur(inpImg,outImg,Size(5,5),1.25);
+            gaussSmooth_flag=false;
+        }
+        //Median blurr filter
+        else if(medSmooth_flag)
+        {
+            //src,dst,ksize(kernel size)
+            medianBlur(inpImg,outImg,5);
+            medSmooth_flag=false;
+        }
+        //Bilateral filter
+        else if(bilatSmooth_flag)
+        {
+            /*src,dst,ksize,sigmaSpace,maxsigmaColor,bordertype
+             * ksize=kernel size
+             * sigmaSpace=Larger value of the parameter means
+             * that farther pixels will influence each other
+             * maxsigmaColor= Larger value of the parameter means
+             * that more dissimilar pixels will influence each other
+            */
+            bilateralFilter(inpImg,outImg,15,200,200);
+            bilatSmooth_flag=false;
+        }
+        else if(blurrSmooth_flag)
+        {
+            blur(inpImg,outImg,Size(3,3),Point(-1,-1));
+            blurrSmooth_flag=false;
+        }
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+    }
+}
+
+//pyramids
+void MainWindow::img_pyramids()
+{
+    if(true)
+    {
+        //ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat inpImg, outImg;
+
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+
+        for(int i=0;i<pyramidLvl;i++)
+        {
+            //Gaussian pyramid
+            if(gauPyr_flag)
+            {
+                QString msg="level"+QString::number(i+1);
+                //src,dst,size
+                pyrDown(inpImg,outImg,Size(inpImg.cols/2,inpImg.rows/2));
+                imshow(msg.toStdString(),outImg);
+                //copy the outImg to inpImg so that we can process the next level
+                outImg.copyTo(inpImg);
+            }
+            //Laplacian Pyramid
+            else if(lapPyr_flag)
+            {
+                QString msg="level"+QString::number(i+1);
+                //src,dst,size
+                pyrUp(inpImg,outImg,Size(inpImg.cols*2,inpImg.rows*2));
+                imshow(msg.toStdString(),outImg);
+                //copy the outImg to inpImg so that we can process the next level
+                outImg.copyTo(inpImg);
+            }
+        }
+        gauPyr_flag=false;
+        lapPyr_flag=false;
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+    }
+}
 //save output img
 bool MainWindow::save_outputImg()
 {
@@ -538,7 +701,7 @@ void MainWindow::imgMulTemplateMatching()
 
 //feature detector
 //AGAST algo
-void MainWindow::imgAGASTfetDetector()
+void MainWindow::imgFetDetector()
 {
     /*Adaptive and Genric accelerated segment test
      *useful in corner detection*/
@@ -564,11 +727,25 @@ void MainWindow::imgAGASTfetDetector()
         //blurr filter to reduce unwanted keypoints
         //medianBlur(inpImg,inputImage,5);
         vector<KeyPoint> keypoints;
-        AGAST(inputImage,
-              keypoints,
-              threshld, //threshold value
-              maxSup, //maximum supression
-              algo_type); //algorithm type
+
+        if(AGAST_flag)
+        {
+            AGAST(inputImage,
+                  keypoints,
+                  threshld, //threshold value
+                  maxSup, //maximum supression
+                  algo_type); //algorithm type
+            AGAST_flag=false;
+        }
+        else if(BRISK_flag)
+        {
+            Ptr<BRISK> brisk=
+                    BRISK::create(BRISK_thrshld,
+                                  BRISK_octaves,
+                                  BRISK_pattern);
+            BRISK_flag=false;
+        }
+
         drawKeypoints(inputImage,keypoints,outputImage);
         //imshow("Output Image", outputImage);
         imwrite(fileName.toStdString(),outputImage);
@@ -588,6 +765,168 @@ void MainWindow::imgAGASTfetDetector()
            ui->outputImage_graphicsView->scene()->addPixmap(img1);
         }
      }
+}
+
+//extract and match
+void MainWindow::imgExtractAndMatch()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    cv::Mat outputImage;
+    if(!fileName.isEmpty())
+    {
+        if(extractAndMatch_flag)
+        {
+            using namespace cv;
+            using namespace std;
+            ui->output_lineEdit->setText(fileName);
+            using namespace cv;
+            Mat img1, img2;
+            vector<DMatch> matches;
+            //extract keypoints from both the images
+            img2=imread(ui->input_lineEdit->text().toStdString());
+            img1=imread("C:/ComputerVision/Images/firstt2.jpg");
+
+            //Step 1: AKAZE algo to detect keypoints
+            Ptr<AKAZE> akaze=AKAZE::create();
+            vector<KeyPoint> keypoints1,keypoints2;
+            //set the algo parameters
+            akaze->setDescriptorChannels(3);
+            akaze->setDescriptorSize(0);
+            akaze->setDescriptorType(desType);
+            akaze->setDiffusivity(diffusvty);
+            akaze->setNOctaves(octave_no);
+            akaze->setNOctaveLayers(octave_layr);
+            akaze->setThreshold(emThreshold);
+            akaze->detect(img1,keypoints1);
+            akaze->detect(img2,keypoints2);
+
+            //Step 2: Extract the descriptors
+            Mat descriptor1,descriptor2;
+            akaze->compute(img1,keypoints1,descriptor1);
+            akaze->compute(img2,keypoints2,descriptor2);
+
+            //Step 3: Descriptor matching
+            Ptr<DescriptorMatcher> descMather;
+            descMather=DescriptorMatcher::create(descriptor_matcher);
+                        //DescriptorMatcher::FLANNBASED);
+            descMather->match(descriptor1, descriptor2, matches);
+
+            // Find good matches (AKAZE)
+            vector<DMatch> goodMatches;
+            double matchThresh = 0.1;
+            for(int i=0; i<descriptor1.rows; i++)
+            {
+                if(matches[i].distance < matchThresh)
+                    goodMatches.push_back(matches[i]);
+            }
+
+            //Mat outputImage;
+            drawMatches(img1,
+                        keypoints1,
+                        img2,
+                        keypoints2,
+                        goodMatches,
+                        outputImage);
+
+            vector<Point2f> goodP1, goodP2;
+            for(size_t i=0; i<goodMatches.size(); i++)
+            {
+                goodP1.push_back(keypoints1[goodMatches[i].queryIdx].pt);
+                goodP2.push_back(keypoints2[goodMatches[i].trainIdx].pt);
+            }
+            Mat homoChange = findHomography(goodP1, goodP2);
+
+            vector<Point2f> corners1(4), corners2(4);
+            corners1[0] = Point2f(0,0);
+            corners1[1] = Point2f(img1.cols-1, 0);
+            corners1[2] = Point2f(img1.cols-1, img1.rows-1);
+            corners1[3] = Point2f(0, img1.rows-1);
+
+            perspectiveTransform(corners1, corners2, homoChange);
+            //img2.copyTo(outputImage);
+            Point2f offset(img1.cols, 0);
+
+            line(outputImage, corners2[0] + offset, corners2[1] + offset, Scalar::all(1), 2);
+            line(outputImage, corners2[1] + offset, corners2[2] + offset, Scalar::all(1), 2);
+            line(outputImage, corners2[2] + offset, corners2[3] + offset, Scalar::all(1), 2);
+            line(outputImage, corners2[3] + offset, corners2[0] + offset, Scalar::all(1), 2);
+
+            /*//call the match function
+            vector<DMatch> matches;
+            descMather->match(descriptors1,descriptors2,matches);
+
+            Mat dispImg;
+            drawMatches(img1,
+                        keypoints1,
+                        img2,
+                        keypoints2,
+                        matches,
+                        dispImg,
+                        Scalar(0,255,0),
+                        Scalar::all(-1),
+                        vector<char>(),
+                        DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+            imshow("oo",dispImg);
+            //filter out unwanted matching results
+            vector<DMatch> goodMatches;
+            double matchThresh=0.1;
+            for(int i=0;i<descriptors1.rows;i++)
+            {
+                if(matches[i].distance<matchThresh)
+                    goodMatches.push_back(matches[i]);
+            }
+            //use goodMatches to find the homography change
+            vector<Point2f> goodP1,goodP2;
+            for(int i=0;i<goodMatches.size();i++)
+            {
+                goodP1.push_back(keypoints1[goodMatches[i].queryIdx].pt);
+                goodP2.push_back(keypoints2[goodMatches[i].trainIdx].pt);
+            }
+            Mat homoChange=findHomography(goodP1,goodP2);
+
+            //apply perspective transform to the matched points using homography
+            //change matrix
+            vector<Point2f> corners1 (4), corners2 (4);
+            corners1[0] = Point2f(0,0);
+            corners1[1] = Point2f(img1.cols-1, 0);
+            corners1[2] = Point2f(img1.cols-1, img1.rows-1);
+            corners1[3] = Point2f(0, img1.rows-1);
+
+            perspectiveTransform(corners1, corners2, homoChange);
+
+            img2.copyTo(dispImg);
+
+            //Point2f offset(img1.cols, 0);
+
+            line(dispImg, corners2[0], corners2[1], Scalar::all(255), 2);
+            line(dispImg, corners2[1], corners2[2], Scalar::all(255), 2);
+            line(dispImg, corners2[2], corners2[3], Scalar::all(255), 2);
+            line(dispImg, corners2[3], corners2[0], Scalar::all(255), 2);*/
+
+            imshow("output image",outputImage);
+            imwrite(fileName.toStdString(),outputImage);
+
+            //display output img using opencv
+            if(ui->displayImg_checkBox->isChecked())
+            {
+                imshow("Output_Image",outputImage);
+            }
+
+            //display output img using qt
+            QPixmap img_out = QPixmap(fileName);
+            if (!img_out.isNull())
+            {
+               delete ui->outputImage_graphicsView->scene();
+               ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+               ui->outputImage_graphicsView->scene()->addPixmap(img_out);
+            }
+            extractAndMatch_flag=false;
+        }
+    }
 }
 
 /*////////////////////////////////////////////////////////*/
@@ -688,6 +1027,36 @@ void MainWindow::on_gauFilter_flag(bool b)
     mbGauFilter_flag=b;
     img_filtering();
 }
+void MainWindow::on_bilateralFilterSignal(bool b)
+{
+    biltrlFilter_flag=b;
+    img_filtering();
+}
+void MainWindow::on_boxFilterSignal(bool b)
+{
+    boxFilter_flag=b;
+    img_filtering();
+}
+void MainWindow::on_edgeFilterSignal(bool b)
+{
+    edgeDetFilter_flag=b;
+    img_filtering();
+}
+void MainWindow::on_laplacianFilterSignal(bool b)
+{
+    lapFilter_flag=b;
+    img_filtering();
+}
+void MainWindow::on_medianFilterSignal(bool b)
+{
+    medianFilter_flag=b;
+    img_filtering();
+}
+void MainWindow::on_twoDFilterSignal(bool b)
+{
+    twoDFilter_flag=b;
+    img_filtering();
+}
 void MainWindow::on_filtering_pushButton_clicked()
 {
     //model approach
@@ -699,6 +1068,19 @@ void MainWindow::on_filtering_pushButton_clicked()
     //other thread in mainwindow.cpp file is notified to filter the image
     connect(&fd, &filtersDialog::gauFilter_flag,this,
             &MainWindow::on_gauFilter_flag);
+    connect(&fd,&filtersDialog::medianFilterSignal,this,
+            &MainWindow::on_medianFilterSignal);
+    connect(&fd,&filtersDialog::twoDFilterSignal,this,
+            &MainWindow::on_twoDFilterSignal);
+    connect(&fd,&filtersDialog::laplacianFilterSignal,this,
+            &MainWindow::on_laplacianFilterSignal);
+    connect(&fd,&filtersDialog::boxFilterSignal,this,
+            &MainWindow::on_boxFilterSignal);
+    connect(&fd,&filtersDialog::edgeFilterSignal,this,
+            &MainWindow::on_edgeFilterSignal);
+    connect(&fd,&filtersDialog::bilateralFilterSignal,this,
+            &MainWindow::on_bilateralFilterSignal);
+
     fd.setModal(true);
     fd.exec();
 }
@@ -832,7 +1214,15 @@ void MainWindow::on_AGASTSignal(bool b,int thrs,bool ifChecked,
     threshld=thrs;
     maxSup=ifChecked;
     algo_type=type;
-    imgAGASTfetDetector();
+    imgFetDetector();
+}
+void MainWindow::on_BRISKSignal(bool b, int t,int o, int p)
+{
+    BRISK_flag=b;
+    BRISK_thrshld=t;
+    BRISK_octaves=o;
+    BRISK_pattern=p;
+    imgFetDetector();
 }
 void MainWindow::on_fDetection_pushButton_clicked()
 {
@@ -840,6 +1230,172 @@ void MainWindow::on_fDetection_pushButton_clicked()
     //connect AGAST_signal from featureDetectorDialog to mainwindow
     connect(&fdd,&featureDetectorDialog::AGAST_signal,this,
             &MainWindow::on_AGASTSignal);
+    //connect BRISK_signal to here
+    connect(&fdd,&featureDetectorDialog::BRISK_signal,this,
+            &MainWindow::on_BRISKSignal);
     fdd.setModal(true);
     fdd.exec();
+}
+
+/*//////////////////Push Button Extraction & Matching///////////*/
+void MainWindow::on_extractAndMatchSignal(bool b,int d,double t,int o,
+                                          int ol,int diff,int desMatcher)
+{
+    extractAndMatch_flag=b;
+    desType=d;
+    emThreshold=t;
+    octave_no=o;
+    octave_layr=ol;
+    diffusvty=diff;
+    descriptor_matcher=desMatcher;
+    imgExtractAndMatch();
+}
+void MainWindow::on_emd_pushButton_clicked()
+{
+    extrctAndMtchDialog emd(this);
+    //connection
+    connect(&emd,&extrctAndMtchDialog::extractAndMatchSignal,this,
+            &MainWindow::on_extractAndMatchSignal);
+    emd.setModal(true);
+    emd.exec();
+}
+
+/*//////////////////Push Button Smoothing///////////*/
+void MainWindow::on_smoothingSignal(bool b,bool bl,bool m,bool g,bool bil)
+{
+    blurrSmooth_flag=bl; medSmooth_flag=m;
+    gaussSmooth_flag=g; bilatSmooth_flag=bil;
+    img_smoothing();
+}
+void MainWindow::on_smoothing_pushButton_clicked()
+{
+    smoothDialog sd(this);
+    //connection
+    connect(&sd,&smoothDialog::smoothingSignal,this,
+            &MainWindow::on_smoothingSignal);
+    sd.setModal(true);
+    sd.exec();
+}
+/*//////////////////Push Button Pyramids///////////*/
+void MainWindow::on_pyramidSignal(bool g,bool l,int pl)
+{
+    gauPyr_flag=g; lapPyr_flag=l; pyramidLvl=pl;
+    img_pyramids();
+}
+void MainWindow::on_pyramid_pushButton_clicked()
+{
+    pyramidsDialog pd(this);
+    //connection
+    connect(&pd,&pyramidsDialog::pyramidSignal,this,
+            &MainWindow::on_pyramidSignal);
+    pd.setModal(true);
+    pd.exec();
+}
+/*/////////////Push Button Edge Detection//////////*/
+void MainWindow::on_edgeDet_pushButton_clicked()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Save Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    //bool var=save_outputImg();
+
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat inpImg, outImg;
+
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+        //change the image to gray scale
+        cvtColor(inpImg,outImg,CV_BGR2GRAY);
+        //blur the image
+        blur(outImg,outImg,Size(3,3));
+        //canny operator
+        int thrshld=0;
+        Canny(outImg,outImg,thrshld,thrshld*3,3);
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+    }
+}
+/*/////////////Push Button Contours///////////////////////*/
+void MainWindow::on_contour_pushButton_clicked()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Save Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    //bool var=save_outputImg();
+
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        using namespace std;
+        Mat inpImg, outImg;
+
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+        //change the image to gray scale
+        cvtColor(inpImg,outImg,CV_BGR2GRAY);
+        //blur the image
+        blur(outImg,outImg,Size(3,3));
+        //canny operator
+        int thrshld=75;
+        Canny(outImg,outImg,thrshld,thrshld*2,3);
+        //find contour
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        findContours(outImg,contours,hierarchy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,
+                     Point(0,0));
+        //Draw contours
+        RNG rng(12345);
+        Mat drawing = Mat::zeros(outImg.size(), CV_8UC3 );
+        for( int i = 0; i< contours.size(); i++ )
+         {
+           Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+           drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+         }
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),drawing);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",drawing);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+    }
 }

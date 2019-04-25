@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1212</width>
+    <width>1327</width>
     <height>644</height>
    </rect>
   </property>
@@ -235,6 +235,73 @@ with Multiple Occurence</string>
 Detection</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="emd_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>10</y>
+      <width>151</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Extracting and
+Matching Descriptors</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="smoothing_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>40</y>
+      <width>91</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Smoothing</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pyramid_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>40</y>
+      <width>91</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pyramids</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="edgeDet_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>1060</x>
+      <y>10</y>
+      <width>80</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Edge 
+Detection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="contour_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>1220</x>
+      <y>100</y>
+      <width>80</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Contours</string>
+    </property>
+   </widget>
    <zorder>mulTemplatemat_pushButton</zorder>
    <zorder>displayImg_checkBox</zorder>
    <zorder>layoutWidget</zorder>
@@ -244,13 +311,18 @@ Detection</string>
    <zorder>morphology_pushButton</zorder>
    <zorder>templateMat_pushButton</zorder>
    <zorder>fDetection_pushButton</zorder>
+   <zorder>emd_pushButton</zorder>
+   <zorder>smoothing_pushButton</zorder>
+   <zorder>pyramid_pushButton</zorder>
+   <zorder>edgeDet_pushButton</zorder>
+   <zorder>contour_pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1212</width>
+     <width>1327</width>
      <height>26</height>
     </rect>
    </property>

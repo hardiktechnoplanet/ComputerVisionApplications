@@ -31,7 +31,10 @@ SOURCES += \
     thresholdingdialog.cpp \
     morphologydialog.cpp \
     templatematchingdialog.cpp \
-    featuredetectordialog.cpp
+    featuredetectordialog.cpp \
+    extrctandmtchdialog.cpp \
+    smoothdialog.cpp \
+    pyramidsdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,7 +42,10 @@ HEADERS += \
     thresholdingdialog.h \
     morphologydialog.h \
     templatematchingdialog.h \
-    featuredetectordialog.h
+    featuredetectordialog.h \
+    extrctandmtchdialog.h \
+    smoothdialog.h \
+    pyramidsdialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -47,5 +53,8 @@ FORMS += \
     thresholdingdialog.ui \
     morphologydialog.ui \
     templatematchingdialog.ui \
-    featuredetectordialog.ui
+    featuredetectordialog.ui \
+    extrctandmtchdialog.ui \
+    smoothdialog.ui \
+    pyramidsdialog.ui
 

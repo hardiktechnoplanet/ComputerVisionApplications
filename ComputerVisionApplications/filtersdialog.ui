@@ -42,6 +42,84 @@
     <string>Gaussian</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="median_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>130</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Median Blurr</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="bilateral_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>180</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Bilateral</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="box_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>230</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Box</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="twoD_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>80</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>2D Filter</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="edge_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>130</y>
+     <width>111</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Edge Detection</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="laplacian_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>180</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laplacian</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>

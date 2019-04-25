@@ -15,6 +15,13 @@ public:
     explicit smoothDialog(QWidget *parent = 0);
     ~smoothDialog();
 
+signals:
+    //flag,blur,median,gaussian,bilateral
+    void smoothingSignal(bool,bool,bool,bool,bool);
+
+private slots:
+    void on_smoothOk_pushButton_clicked();
+
 private:
     Ui::smoothDialog *ui;
 };

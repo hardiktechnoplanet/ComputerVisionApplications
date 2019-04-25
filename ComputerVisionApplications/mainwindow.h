@@ -44,6 +44,23 @@ private slots:
     //filtering using the push button
     void on_filtering_pushButton_clicked();
     void on_gauFilter_flag(bool);
+    void on_bilateralFilterSignal(bool);
+    void on_boxFilterSignal(bool);
+    void on_medianFilterSignal(bool);
+    void on_twoDFilterSignal(bool);
+    void on_edgeFilterSignal(bool);
+    void on_laplacianFilterSignal(bool);
+
+    //smoothing
+    //flag,blue,median,gaussian,bilateral
+    void on_smoothingSignal(bool,bool,bool,bool,bool);
+    void img_smoothing();
+
+    //pyramids
+    //gaussian,laplacian,pyramid level
+    void on_pyramidSignal(bool,bool,int);
+    void img_pyramids();
+
     //thresholding
     void on_thresholdingSignal(bool);
     void on_AdpthresholdingSignal(bool);
@@ -72,9 +89,24 @@ private slots:
 
     //feature detector
     void on_fDetection_pushButton_clicked();
+    void imgFetDetector();
     //AGAST algo
     void on_AGASTSignal(bool,int,bool,int);
-    void imgAGASTfetDetector();
+    //BRISK algo
+    void on_BRISKSignal(bool,int,int,int);
+
+    //extraction and matching
+    void on_emd_pushButton_clicked();
+    void on_extractAndMatchSignal(bool,int,double,int,int,int,int);
+    void imgExtractAndMatch();
+
+    void on_smoothing_pushButton_clicked();
+
+    void on_pyramid_pushButton_clicked();
+
+    void on_edgeDet_pushButton_clicked();
+
+    void on_contour_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -85,13 +117,20 @@ private:
     //filter flags
     bool gaussianFilter_flag;
     bool blurrFilter_flag;
-    bool biltrlFilter_flag;
+    bool medianFilter_flag;
     bool boxFilter_flag;
     bool twoDFilter_flag;
     bool edgeDetFilter_flag;
     bool lapFilter_flag;
+    bool biltrlFilter_flag;
     bool scharrFilter_flag;
     bool sobelFilter_flag;
+
+    //smoothing flags
+    bool blurrSmooth_flag; bool medSmooth_flag;
+    bool gaussSmooth_flag; bool bilatSmooth_flag;
+    //pyramids flags
+    bool gauPyr_flag; bool lapPyr_flag; int pyramidLvl;
 
     //push button filter flags
     bool mbGauFilter_flag;
@@ -114,6 +153,14 @@ private:
     //AGAST
     bool AGAST_flag, maxSup;
     int threshld, algo_type;
+    //BRISK
+    bool BRISK_flag;
+    int BRISK_thrshld,BRISK_octaves,BRISK_pattern;
+
+    //extract and match
+    bool extractAndMatch_flag;
+    int desType,octave_no,octave_layr,diffusvty,descriptor_matcher;
+    double emThreshold;
 
 protected:
     //to prompt the user when they want to close

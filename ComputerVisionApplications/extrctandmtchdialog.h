@@ -14,6 +14,13 @@ class extrctAndMtchDialog : public QDialog
 public:
     explicit extrctAndMtchDialog(QWidget *parent = 0);
     ~extrctAndMtchDialog();
+signals:
+    //flag,descriptor type,threshold,octaves,octaves layers,
+    //diffusivity,descriptor matcher
+    void extractAndMatchSignal(bool,int,double,int,int,int,int);
+
+private slots:
+    void on_ok_pushButton_clicked();
 
 private:
     Ui::extrctAndMtchDialog *ui;

@@ -19,6 +19,8 @@ signals:
     //send signal,threshold value,max-suppression true
     //or false, and algo type
     void AGAST_signal(bool,int,bool,int);
+    //flag,threshold,octave,pattern scale
+    void BRISK_signal(bool,int, int,int);
 
 private slots:
     void on_ok_pushButton_clicked();
