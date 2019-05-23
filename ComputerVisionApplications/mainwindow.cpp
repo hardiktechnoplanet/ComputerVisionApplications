@@ -17,6 +17,7 @@
 #include "edgedetectiondialog.h"
 #include "imgtransformdialog.h"
 #include "houghdialog.h"
+#include "imgsegmentationdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -94,6 +95,9 @@ MainWindow::MainWindow(QWidget *parent) :
     mhtLine_flag=false;
     ui->hough_pushButton->setToolTip("detects lines, circles, or other simple"
                                      "forms in an image");
+
+    //image segmentation
+    watershed_flag=false; grabcut_flag=false; meanshift_flag=false;
 
     //pyramids
     gauPyr_flag=false; lapPyr_flag=false;
@@ -985,6 +989,165 @@ void MainWindow::img_transform()
         }
 
      }
+}
+
+//image segmentation
+void MainWindow::img_segmentation()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat src,outImg;
+        src=imread(ui->input_lineEdit->text().toStdString());
+        //display the input image
+        imshow("Source Image", src);
+
+        //watershed
+        if(watershed_flag)
+        {
+            /*Convert the background color from white to black. It will
+             * give better results for Distance Transform operation*/
+            for( int x = 0; x < src.rows; x++ )
+            {
+              for( int y = 0; y < src.cols; y++ )
+              {
+                  if ( src.at<Vec3b>(x, y) == Vec3b(255,255,255) ) {
+                    src.at<Vec3b>(x, y)[0] = 0;
+                    src.at<Vec3b>(x, y)[1] = 0;
+                    src.at<Vec3b>(x, y)[2] = 0;
+                  }
+                }
+            }
+            // Show output image
+            imshow("black background image", src);
+
+            /* Now, sharp the image to acute the edges of the foreground objects*/
+            // Create a kernel for sharpening our image
+            Mat kernel = (Mat_<float>(3,3) <<
+                    1,  1, 1,
+                    1, -8, 1,
+                    1,  1, 1); // an approximation of second derivative, a quite strong kernel
+            // do the laplacian filtering as it is
+            // well, we need to convert everything in something more deeper then CV_8U
+            // because the kernel has some negative values,
+            // and we can expect in general to have a Laplacian image with negative values
+            // BUT a 8bits unsigned int (the one we are working with) can contain values from 0 to 255
+            // so the possible negative number will be truncated
+            Mat imgLaplacian;
+            Mat sharp = src; // copy source image to another temporary one
+            filter2D(sharp, imgLaplacian, CV_32F, kernel);
+            src.convertTo(sharp, CV_32F);
+            Mat imgResult = sharp - imgLaplacian;
+            // convert back to 8bits gray scale
+            imgResult.convertTo(imgResult, CV_8UC3);
+            imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
+            imshow( "New Sharped Image", imgResult );
+
+            /*transform the sharped source image to a grayscale image and
+             * binary image*/
+            src = imgResult; // copy back
+            // Create binary image from source image
+            Mat bw;
+            cvtColor(src, bw, CV_BGR2GRAY);
+            threshold(bw, bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+            imshow("Binary Image", bw);
+
+            // Perform the distance transform algorithm
+            Mat dist;
+            distanceTransform(bw, dist, CV_DIST_L2, 3);
+            // Normalize the distance image for range = {0.0, 1.0}
+            // so we can visualize and threshold it
+            normalize(dist, dist, 0, 1., NORM_MINMAX);
+            imshow("Distance Transform Image", dist);
+
+            /*Threshold the dist image and perform morphology operation
+             * to extract the peaks from the above image*/
+            // Threshold to obtain the peaks
+            // This will be the markers for the foreground objects
+            threshold(dist, dist, .4, 1., CV_THRESH_BINARY);
+            // Dilate a bit the dist image
+            Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
+            dilate(dist, dist, kernel1);
+            imshow("Peaks", dist);
+
+            /*From each blob then we create a seed/marker for the watershed
+             * algorithm with the help of the cv::findContours function*/
+            // Create the CV_8U version of the distance image
+            // It is needed for findContours()
+            Mat dist_8u;
+            dist.convertTo(dist_8u, CV_8U);
+            // Find total markers
+            std::vector<std::vector<Point> > contours;
+            findContours(dist_8u, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+            // Create the marker image for the watershed algorithm
+            Mat markers = Mat::zeros(dist.size(), CV_32SC1);
+            // Draw the foreground markers
+            for (size_t i = 0; i < contours.size(); i++)
+                drawContours(markers, contours, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), -1);
+            // Draw the background marker
+            circle(markers, Point(5,5), 3, CV_RGB(255,255,255), -1);
+            imshow("Markers", markers*10000);
+
+            // Perform the watershed algorithm
+            watershed(src, markers);
+            Mat mark = Mat::zeros(markers.size(), CV_8UC1);
+            markers.convertTo(mark, CV_8UC1);
+            bitwise_not(mark, mark);
+        //    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
+                                          // image looks like at that point
+            // Generate random colors
+            std::vector<Vec3b> colors;
+            for (size_t i = 0; i < contours.size(); i++)
+            {
+                int b = theRNG().uniform(0, 255);
+                int g = theRNG().uniform(0, 255);
+                int r = theRNG().uniform(0, 255);
+                colors.push_back(Vec3b((uchar)b, (uchar)g, (uchar)r));
+            }
+            // Create the result image
+            Mat dst = Mat::zeros(markers.size(), CV_8UC3);
+            // Fill labeled objects with random colors
+            for (int i = 0; i < markers.rows; i++)
+            {
+                for (int j = 0; j < markers.cols; j++)
+                {
+                    int index = markers.at<int>(i,j);
+                    if (index > 0 && index <= static_cast<int>(contours.size()))
+                        dst.at<Vec3b>(i,j) = colors[index-1];
+                    else
+                        dst.at<Vec3b>(i,j) = Vec3b(0,0,0);
+                }
+            }
+            // Visualize the final image
+            imshow("Final Result", dst);
+            outImg=dst.clone();
+        }
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output_Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img1 = QPixmap(fileName);
+        if (!img1.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img1);
+        }
+
+     }
+
 }
 //Image Morphology
 void MainWindow::imgMorphology()
@@ -1996,4 +2159,19 @@ void MainWindow::on_LineGapChange(int l)
 void MainWindow::on_minDistChange(int d)
 {
     minDistance=d;
+}
+
+/*/////////////Image Segmentation///////////////////////////*/
+void MainWindow::on_segment_pushButton_clicked()
+{
+    imgSegmentationDialog isd(this);
+    //connection
+    connect(&isd,&imgSegmentationDialog::segmentation,this,&MainWindow::on_segmentation);
+    isd.setModal(true);
+    isd.exec();
+}
+void MainWindow::on_segmentation(bool w,bool g, bool m)
+{
+    watershed_flag=w; grabcut_flag=g; meanshift_flag=m;
+    img_segmentation();
 }

@@ -76,6 +76,10 @@ private slots:
     void on_minDistChange(int);
     void img_hougthTransform();
 
+    //image segmentation
+    void on_segmentation(bool,bool,bool);
+    void img_segmentation();
+
     //pyramids
     //gaussian,laplacian,pyramid level
     void on_pyramidSignal(bool,bool,int);
@@ -136,6 +140,8 @@ private slots:
 
     void on_hough_pushButton_clicked();
 
+    void on_segment_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -171,6 +177,8 @@ private:
     //hough transform
     bool lineStd_flag,lineProgressive_flag,mhtLine_flag,circleHough_flag;
     int houghThreshold,lineLen,lineGap,minDistance;
+    //image segmentation
+    bool watershed_flag, grabcut_flag,meanshift_flag;
     //pyramids flags
     bool gauPyr_flag; bool lapPyr_flag; int pyramidLvl;
 

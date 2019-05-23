@@ -38,7 +38,8 @@ SOURCES += \
     borderdialog.cpp \
     edgedetectiondialog.cpp \
     imgtransformdialog.cpp \
-    houghdialog.cpp
+    houghdialog.cpp \
+    imgsegmentationdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -53,7 +54,8 @@ HEADERS += \
     borderdialog.h \
     edgedetectiondialog.h \
     imgtransformdialog.h \
-    houghdialog.h
+    houghdialog.h \
+    imgsegmentationdialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -68,7 +70,8 @@ FORMS += \
     borderdialog.ui \
     edgedetectiondialog.ui \
     imgtransformdialog.ui \
-    houghdialog.ui
+    houghdialog.ui \
+    imgsegmentationdialog.ui
 
 DISTFILES += \
     Graphics/images2.jpg
