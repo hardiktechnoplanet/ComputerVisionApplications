@@ -15,6 +15,12 @@ public:
     explicit edgeDetectionDialog(QWidget *parent = 0);
     ~edgeDetectionDialog();
 
+signals:
+    void edgeDetSignal(bool,bool,bool);
+
+private slots:
+    void on_edgeDetOK_pushButton_clicked();
+
 private:
     Ui::edgeDetectionDialog *ui;
 };

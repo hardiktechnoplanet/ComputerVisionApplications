@@ -16,16 +16,19 @@ public:
     ~thresholdingDialog();
 
 signals:
-    void thresholdingSignal(bool);
-    void AdpthresholdingSignal(bool);
+    //signal,thresholding value
+    void thresholdingSignal(bool,int);
+    //signal,block size, constant value
+    void AdpthresholdingSignal(bool,int,int);
 
 private slots:
     void on_thrsholdng_pushButton_clicked();
 
-    void on_pushButton_clicked();
+    void on_ADPthrsholdng_pushButton_clicked();
 
 private:
     Ui::thresholdingDialog *ui;
+    int thrshldVal, blockSize, constVal;
 };
 
 #endif // THRESHOLDINGDIALOG_H

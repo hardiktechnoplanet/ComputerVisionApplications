@@ -34,7 +34,11 @@ SOURCES += \
     featuredetectordialog.cpp \
     extrctandmtchdialog.cpp \
     smoothdialog.cpp \
-    pyramidsdialog.cpp
+    pyramidsdialog.cpp \
+    borderdialog.cpp \
+    edgedetectiondialog.cpp \
+    imgtransformdialog.cpp \
+    houghdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +49,11 @@ HEADERS += \
     featuredetectordialog.h \
     extrctandmtchdialog.h \
     smoothdialog.h \
-    pyramidsdialog.h
+    pyramidsdialog.h \
+    borderdialog.h \
+    edgedetectiondialog.h \
+    imgtransformdialog.h \
+    houghdialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -56,5 +64,12 @@ FORMS += \
     featuredetectordialog.ui \
     extrctandmtchdialog.ui \
     smoothdialog.ui \
-    pyramidsdialog.ui
+    pyramidsdialog.ui \
+    borderdialog.ui \
+    edgedetectiondialog.ui \
+    imgtransformdialog.ui \
+    houghdialog.ui
+
+DISTFILES += \
+    Graphics/images2.jpg
 

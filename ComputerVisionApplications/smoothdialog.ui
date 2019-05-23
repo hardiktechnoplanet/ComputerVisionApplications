@@ -28,8 +28,8 @@
     <rect>
      <x>260</x>
      <y>270</y>
-     <width>80</width>
-     <height>25</height>
+     <width>93</width>
+     <height>45</height>
     </rect>
    </property>
    <property name="text">
@@ -44,6 +44,10 @@
      <width>391</width>
      <height>61</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">   border: 2px solid white;
+   border-radius:5px;</string>
    </property>
    <property name="html">
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;

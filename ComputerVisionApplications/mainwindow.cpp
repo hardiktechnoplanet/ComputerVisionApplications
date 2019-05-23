@@ -1,6 +1,7 @@
 #include <QFileDialog>
 #include <QWheelEvent>
 #include <QDebug>
+#include <QPushButton>
 #include <vector>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -12,6 +13,10 @@
 #include "extrctandmtchdialog.h" //extractor and matching header file
 #include "smoothdialog.h" //smoothing operator header file
 #include "pyramidsdialog.h"
+#include "borderdialog.h"
+#include "edgedetectiondialog.h"
+#include "imgtransformdialog.h"
+#include "houghdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,8 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //background image
     //set the background JADAK image
-    QPixmap bkgnd("C:/Qt/Qt5.11.0/Projects/ISG/Test4_MedleyUcamDemo"
-                  "/Graphics/JadakBackground_old.png");
+    QPixmap bkgnd("C:/ComputerVision/Images/images2.jpg");
     bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);
@@ -30,13 +34,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //stylesheet
     qApp->setStyleSheet("QPushButton {background-color:white;"
+                        ""
                         "border-style:outset;"
                         "border-width:2px;"
                         "border-radius:10px;"
                         "border-color:beige;"
                         "font:bold 10px;"
                         "min-width: 5em;"
-                        "padding: 6px}");
+                        "padding: 6px}"
+                        "QPushButton:hover {background-color:rgb(224,225,0)}"
+                        "QPushButton:pressed {background-color:rgb(224,225,0)}");
+    //qApp->setStyleSheet("QPushButton:hover {background-color: rgb(224, 0, 200)}");
 
         /*background-color: red;
     border-style: outset;
@@ -52,6 +60,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //pushbutton filter flags
     mbGauFilter_flag=false;
 
+    //border flag
+    constBorderFlag=false; repBorderFlag=false;wrapBorderFlag=false;
+    refBorderFlag=false; ref101BorderFlag=false;
+    ui->border_pushButton->setToolTip("creates virtual pixels outside"
+                                      "of the image at the borders");
     //filter flags
     gaussianFilter_flag=false;
     blurrFilter_flag=false;
@@ -65,15 +78,32 @@ MainWindow::MainWindow(QWidget *parent) :
     //smoothing flag
     blurrSmooth_flag=false; gaussSmooth_flag=false;
     bilatSmooth_flag=false, medSmooth_flag=false;
-    ui->smoothing_pushButton->setToolTip("usually done to reduce noise"
-                                      "or camera artifacts");
+    ui->smoothing_pushButton->setToolTip("reduce noise"
+                                      " or camera artifacts");
+    //edge detection
+    scharr_flag=false; laplacian_flag=false; sobel_flag=false;
+    ui->edgeDet_pushButton->setToolTip("derivative computation or"
+                                       "edge detection");
+    //image transform
+    inpaint_flag=false; hist_flag=false;
+    ui->imgTransform_pushButton->setToolTip("general image transformation like"
+                                            " inpainting and Histogram Equalization");
+
+    //hough transform
+    lineStd_flag=false; lineProgressive_flag=false; circleHough_flag=false;
+    mhtLine_flag=false;
+    ui->hough_pushButton->setToolTip("detects lines, circles, or other simple"
+                                     "forms in an image");
+
     //pyramids
     gauPyr_flag=false; lapPyr_flag=false;
     ui->pyramid_pushButton->setToolTip("downsample or upsample the input"
-                                       "image");
+                                       " image");
     //thresholding
-    thresholding_flag=false;
-    Adpthresholding_flag=false;
+    thresholding_flag=false; Adpthresholding_flag=false;
+    ui->thresholding_pushButton->setToolTip("keep all the pixles in the image that"
+                                            "are above or below some particular value");
+    thrshldVal=0; blocksizeVal=3;constvarVal=0;
     //morphology
     erosion_flag=false;
     dilation_flag=false;
@@ -126,6 +156,166 @@ void MainWindow::on_inputImage_pushButton_clicked()
 
 }
 
+/*//////////////////////////border extrapolation/////////////////////*/
+void MainWindow::img_border()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat inpImg, outImg;
+
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+
+        //select the padding size as 0.5% of the input image
+        int top,bottom,left,right;
+        top=(int) (0.5*inpImg.rows); bottom=top;
+        left=(int) (0.5*inpImg.cols); right=left;
+
+        //const border
+        if(constBorderFlag)
+        {
+            /*src,dst,top side padding, bottom side padding,
+             *left side padding, right side padding, border type,
+             * val for const border*/
+            copyMakeBorder(inpImg,outImg,top,bottom,left,right,BORDER_CONSTANT,45);
+        }
+        else if(repBorderFlag)
+        {
+            copyMakeBorder(inpImg,outImg,top,bottom,left,right,BORDER_REPLICATE);
+        }
+        else if(wrapBorderFlag)
+        {
+            copyMakeBorder(inpImg,outImg,top,bottom,left,right,BORDER_WRAP);
+        }
+        else if(refBorderFlag)
+        {
+            copyMakeBorder(inpImg,outImg,top,bottom,left,right,BORDER_REFLECT);
+        }
+        else if(ref101BorderFlag)
+        {
+            copyMakeBorder(inpImg,outImg,top,bottom,left,right,BORDER_REFLECT_101);
+        }
+
+        else if(gaussianFilter_flag || mbGauFilter_flag)
+        {
+            /*src,dst,ksize,sigmaX,sigmaY
+             * sigmaX=Gaussian kernel standard deviation in
+             * X direction.
+             * sigmaY=Gaussian kernel standard deviation in
+             * Y direction.
+            */
+            cv::GaussianBlur(inpImg,outImg,Size(5,5),1.25);
+            gaussianFilter_flag=false;
+        }
+        //Median blurr filter
+        else if(blurrFilter_flag)
+        {
+            //src,dst,ksize(kernel size)
+            cv::medianBlur(inpImg,outImg,5);
+            blurrFilter_flag=false;
+        }
+        //Bilateral filter
+        else if(biltrlFilter_flag)
+        {
+            /*src,dst,ksize,sigmaSpace,maxsigmaColor,bordertype
+             * ksize=kernel size
+             * sigmaSpace=Larger value of the parameter means
+             * that farther pixels will influence each other
+             * maxsigmaColor= Larger value of the parameter means
+             * that more dissimilar pixels will influence each other
+            */
+            cv::bilateralFilter(inpImg,outImg,15,200,200);
+            biltrlFilter_flag=false;
+        }
+        //Box filter
+        else if(boxFilter_flag)
+        {
+            Size * kernelSize=new Size(10,10);
+            Point * pt=new Point(-1,-1);
+            /*src,dst,depth,kernel size,anchor point, normalised*/
+            //cv::boxFilter(inpImg,outImg,50,&size,&pt,true);
+            boxFilter_flag=false;
+        }
+        //2D filter flag
+        else if(twoDFilter_flag)
+        {
+            Matx33f f2dkernel (0, -1, 0,
+                               -1, 5, -1,
+                               0, -1, 0);
+            int depth=-1;
+            cv::filter2D(inpImg,outImg,depth,f2dkernel);
+            twoDFilter_flag=false;
+        }
+        //edge detection
+        else if(edgeDetFilter_flag)
+        {
+            Matx33f f2dkernel (0, +1.5, 0,
+                               +1.5, -6, +1.5,
+                               0, +1.5, 0);
+            int depth=-1;
+            cv::filter2D(inpImg,outImg,depth,f2dkernel);
+            edgeDetFilter_flag=false;
+        }
+        //edge detection(img derivatives)->laplacian
+        else if(lapFilter_flag)
+        {
+            int depth=-1;
+            int kernelSize=3;
+            double scale=1.0; double delta=0.0;
+            cv::Laplacian(inpImg,outImg,depth,kernelSize,
+                          scale,delta);
+            lapFilter_flag=false;
+
+        }
+        //scharr filter
+        else if(scharrFilter_flag)
+        {
+            int depth=-1;
+            int dx=1; int dy=0;
+            double scale=1.0; double delta=100.0;
+            cv::Scharr(inpImg,outImg,depth,dx,dy,scale,delta);
+            scharrFilter_flag=false;
+        }
+        //sobel filter
+        else if(sobelFilter_flag)
+        {
+            int depth=-1;
+            int dx=1; int dy=0;
+            int kernelSize=3;
+            double scale=5; double delta=220;
+            cv::Sobel(inpImg,outImg,depth,dx,dy,kernelSize,
+                          scale,delta);
+            sobelFilter_flag=false;
+        }
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+    }
+}
 /*//////////////////////////filtering/////////////////////////*/
 void MainWindow::img_filtering()
 {
@@ -334,6 +524,237 @@ void MainWindow::img_smoothing()
     }
 }
 
+//edge detection
+void MainWindow::img_edgeDetection()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat inpImg, outImg;
+
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+
+        //Sobel derivative
+        if(sobel_flag)
+        {
+            /*src,dst,ddepth,xorder,yorder,ksize,scale,delta,border type
+             * ddepth=pixel depth of output
+             * xorder=order of corresponding derivative in x
+             * yorder=order of corresponding derivative in y
+             * ksize=kernel size, scale is assigned before assignment
+             * de;ta os a[[;oed nefpre assignment
+            */
+            Sobel(inpImg,outImg,CV_16S,1,1,5,1,1,BORDER_DEFAULT);
+            sobel_flag=false;
+        }
+        //Scharr filter
+        else if(scharr_flag)
+        {
+            //src,dst,ddepth,xorder,yorder,scale,delta
+            int depth=-1;
+            int dx=1; int dy=0;
+            double scale=1.0; double delta=100.0;
+            Scharr(inpImg,outImg,depth,dx,dy,scale,delta);
+            scharr_flag=false;
+        }
+        //laplacian
+        else if(laplacian_flag)
+        {
+            /*src,dst,ddepth,ksize,scale,delta,border type*/
+            Laplacian(inpImg,outImg,3,1,0, BORDER_DEFAULT);
+            laplacian_flag=false;
+        }
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+    }
+}
+/*//////////////////////////hough transformation/////////////////////////*/
+void MainWindow::img_hougthTransform()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat inputImg,inpImg,outImg;
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        inpImg=imread(ui->input_lineEdit->text().toStdString());
+        inputImg=inpImg.clone();
+
+        //edge detection
+        Mat dst, cdst,cdstP,cdstM,cdstC;
+        if(inpImg.channels()>=3)
+        {
+            cvtColor(inpImg,inpImg,CV_BGR2GRAY);
+        }
+
+        Canny(inpImg, dst, 50, 200, 3);
+        //imshow("hell",cdst);
+        cvtColor(dst, cdst, CV_GRAY2BGR);
+        //clone the image for the progressive and multiscale transforms
+        cdstP=cdst.clone();
+        cdstM=cdst.clone();
+        cdstC=cdst.clone();
+
+        //Standard hough line transform
+        if(lineStd_flag)
+        {
+            //Nx1 2 channel array of floating point type
+            std::vector<Vec2f> lines;
+            /*src,dst,rho,theta,threshold,srn,stn
+             * rho=set the resolution desired for the line (uint is pixel)
+             * theta=set the resolution desired for the line(uint is radians)
+             * srn, stn=used for multiscale hough transform (not for standard
+             * hough transform)
+            */
+            HoughLines(dst,lines,1,CV_PI/180,houghThreshold,0,0);
+
+            //draw the line
+            for( size_t i = 0; i < lines.size(); i++ )
+              {
+                 float rho = lines[i][0], theta = lines[i][1];
+                 Point pt1, pt2;
+                 double a = cos(theta), b = sin(theta);
+                 double x0 = a*rho, y0 = b*rho;
+                 pt1.x = cvRound(x0 + 1000*(-b));
+                 pt1.y = cvRound(y0 + 1000*(a));
+                 pt2.x = cvRound(x0 - 1000*(-b));
+                 pt2.y = cvRound(y0 - 1000*(a));
+                 line( cdst, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
+              }
+            outImg=cdst;
+            lineStd_flag=false;
+
+        }
+        else if(lineProgressive_flag)
+        {
+            // Probabilistic Line Transform
+            std::vector<Vec4i> linesP; // will hold the results of the detection
+            //last 2 parameters are min line length and maxlinegap
+            HoughLinesP(dst, linesP, 1, CV_PI/180, houghThreshold,lineLen,lineGap );
+            // Draw the lines
+            for( size_t i = 0; i < linesP.size(); i++ )
+            {
+                Vec4i l = linesP[i];
+                line( cdstP, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
+            }
+            outImg=cdstP;
+            lineProgressive_flag=false;
+
+        }
+        else if(mhtLine_flag)
+        {
+            //Nx1 2 channel array of floating point type
+            std::vector<Vec2f> lines;
+            /*src,dst,rho,theta,threshold,srn,stn
+             * rho=set the resolution desired for the line (uint is pixel)
+             * theta=set the resolution desired for the line(uint is radians)
+             * srn, stn=used for multiscale hough transform (not for standard
+             * hough transform)
+             * last 2 parameters are used for result refinement
+            */
+            HoughLines(dst,lines,1,CV_PI/180,houghThreshold,0.03,1);
+
+            //draw the line
+            for( size_t i = 0; i < lines.size(); i++ )
+              {
+                 float rho = lines[i][0], theta = lines[i][1];
+                 Point pt1, pt2;
+                 double a = cos(theta), b = sin(theta);
+                 double x0 = a*rho, y0 = b*rho;
+                 pt1.x = cvRound(x0 + 1000*(-b));
+                 pt1.y = cvRound(y0 + 1000*(a));
+                 pt2.x = cvRound(x0 - 1000*(-b));
+                 pt2.y = cvRound(y0 - 1000*(a));
+                 line( cdstM, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
+              }
+            outImg=cdstM;
+            mhtLine_flag=false;
+        }
+        //hough circle transform
+        else if(circleHough_flag)
+        {
+            Mat grayImg;
+            //src=inpImg.clone();
+            // if colored image -convert it to gray
+
+            // Reduce the noise so we avoid false circle detection
+            medianBlur(inpImg, grayImg, 5);
+            //GaussianBlur( grayImg, grayImg, Size(9, 9), 2, 2 );
+
+            std::vector<Vec3f> circles;
+
+            // Apply the Hough Transform to find the circles
+            HoughCircles( grayImg, circles, CV_HOUGH_GRADIENT, 2,
+                          inputImg.cols/minDistance);
+
+            // Draw the circles detected
+            for( size_t i = 0; i < circles.size(); i++ )
+            {
+                Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+                int radius = cvRound(circles[i][2]);
+                // circle center
+                circle( inputImg, center, 3, Scalar(0,255,0), -1, 8, 0 );
+                // circle outline
+                circle( inputImg, center, radius, Scalar(0,0,255), 2, 8, 0 );
+            }
+            //imshow( "Hough Circle Transform Demo", src );
+            outImg=inputImg;
+            circleHough_flag=false;
+        }
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+
+    }
+}
+
 //pyramids
 void MainWindow::img_pyramids()
 {
@@ -441,7 +862,7 @@ void MainWindow::imgThreshold()
              * src, dst, code*/
             cv::cvtColor(inpImg,grayScale,CV_BGR2GRAY);
             /*input,output,thrshld value, max thrshvalue, type*/
-            cv::threshold(grayScale,interMediate,45,255,THRESH_BINARY_INV);
+            cv::threshold(grayScale,interMediate,thrshldVal,255,THRESH_BINARY_INV);
             //convert img back to BGR color
             cv::cvtColor(interMediate,outImg,CV_GRAY2BGR);
             thresholding_flag=false;
@@ -449,13 +870,13 @@ void MainWindow::imgThreshold()
         //adaptive thresholding
         else if(Adpthresholding_flag)
         {
-            Mat grayScale;
+            Mat grayScale,interMediate;
             cv::cvtColor(inpImg,grayScale,CV_BGR2GRAY);
             /*input,output,max thrshvalue,adaptive method,threshold type
             block size, const*/
-            cv::adaptiveThreshold(grayScale,grayScale,255,
-                                  ADAPTIVE_THRESH_GAUSSIAN_C,
-                                  THRESH_BINARY_INV,7,0);
+            cv::adaptiveThreshold(grayScale,interMediate,155,
+                                  ADAPTIVE_THRESH_MEAN_C,
+                                  THRESH_BINARY,blocksizeVal,constvarVal);
             cv::cvtColor(grayScale,outImg,CV_GRAY2BGR);
         }
 
@@ -480,6 +901,91 @@ void MainWindow::imgThreshold()
     }
 }
 
+//general image transform
+void MainWindow::img_transform()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat img, mask,maskGrayScale,dst;
+
+        using namespace cv;
+        img=imread(ui->input_lineEdit->text().toStdString());
+
+        //inpainting
+        if(inpaint_flag)
+        {
+            mask=imread(maskStr.toStdString());
+            cvtColor(mask,maskGrayScale,CV_BGR2GRAY);
+
+            //check if the images are read
+            if(img.empty() || maskGrayScale.empty())
+            {
+                qDebug()<<"Error reading file(s)!";
+            }
+            //inpainting
+            /*input image,mask image,output image, inpaint radius, flags
+             *mask image: damaged area (same size as input image)
+             *inpaint radius: range to consider around pixel
+             *flags: select NS or TELEA*/
+            if(inpaintMethod==0){
+                inpaint(img,maskGrayScale,dst,3,INPAINT_NS);
+            }
+            else
+            {
+                inpaint(img,maskGrayScale,dst,3,INPAINT_TELEA);
+            }
+            inpaint_flag=false;
+        }
+
+        //histogram equalization
+        else if(hist_flag)
+        {
+            //if image is colored
+            if(img.channels()>=3)
+            {
+                Mat ycrcb;
+                cvtColor(img,ycrcb,CV_BGR2YCrCb);
+                std::vector<Mat> channels;
+                split(ycrcb,channels);
+                //Perform HE of the intensity plane Y
+                equalizeHist(channels[0], channels[0]);
+                merge(channels,ycrcb);
+                cvtColor(ycrcb,dst,CV_YCrCb2BGR);
+            }
+            else
+            {
+                equalizeHist(img,dst);
+            }
+            hist_flag=false;
+        }
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),dst);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output_Image",dst);
+        }
+
+        //display output img using qt
+        QPixmap img1 = QPixmap(fileName);
+        if (!img1.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img1);
+        }
+
+     }
+}
 //Image Morphology
 void MainWindow::imgMorphology()
 {
@@ -1086,14 +1592,16 @@ void MainWindow::on_filtering_pushButton_clicked()
 }
 /*//////////////////Push Button Thresholding////////////////*/
 //thresholding
-void MainWindow::on_thresholdingSignal(bool b)
+void MainWindow::on_thresholdingSignal(bool b,int t)
 {
     thresholding_flag=b;
+    thrshldVal=t;
     imgThreshold();
 }
-void MainWindow::on_AdpthresholdingSignal(bool b)
+void MainWindow::on_AdpthresholdingSignal(bool b,int bl,int c)
 {
     Adpthresholding_flag=b;
+    blocksizeVal=bl; constvarVal=c;
     imgThreshold();
 }
 void MainWindow::on_thresholding_pushButton_clicked()
@@ -1398,4 +1906,94 @@ void MainWindow::on_contour_pushButton_clicked()
            ui->outputImage_graphicsView->scene()->addPixmap(img);
         }
     }
+}
+/*/////////////Push Button Border Extrapolation///////////////////////*/
+void MainWindow::on_border_pushButton_clicked()
+{
+    borderDialog bd(this);
+    //connection
+    connect(&bd,&borderDialog::borderSignal,this,&MainWindow::
+            on_borderSignal);
+    bd.setModal(true);
+    bd.exec();
+}
+
+void MainWindow::on_borderSignal(bool constant,bool wrap, bool rep, bool ref,
+                                 bool ref101)
+{
+    constBorderFlag=constant; wrapBorderFlag=wrap; repBorderFlag=rep;
+    refBorderFlag=ref; ref101BorderFlag=ref101;
+
+    img_border();
+
+}
+
+/*/////////////Push Button Edge Detection///////////////////////*/
+void MainWindow::on_edgeDet_pushButton_2_clicked()
+{
+    edgeDetectionDialog ed(this);
+    //connection
+    connect(&ed,&edgeDetectionDialog::edgeDetSignal,this,
+            &MainWindow::on_edgeDetSignal);
+    ed.setModal(true);
+    ed.exec();
+}
+
+void MainWindow::on_edgeDetSignal(bool s, bool sc, bool l)
+{
+    sobel_flag=s; scharr_flag=sc, laplacian_flag=l;
+    img_edgeDetection();
+}
+
+void MainWindow::on_imgTransform_pushButton_clicked()
+{
+    ImgTransformDialog itd(this);
+    //connection
+    connect(&itd,&ImgTransformDialog::imgTransformSignal,this,
+            &MainWindow::on_imgTransformSignal);
+    itd.setModal(true);
+    itd.exec();
+}
+void MainWindow::on_imgTransformSignal(bool i,QString str,int m,bool h)
+{
+    inpaint_flag=i; hist_flag=h;
+    maskStr=str;
+    inpaintMethod=m;
+    img_transform();
+}
+
+/*/////////////Hough Transform///////////////////////////*/
+void MainWindow::on_hough_pushButton_clicked()
+{
+    houghDialog hd(this);
+    //connection
+    connect(&hd,&houghDialog::houghTransform,this,&MainWindow::on_houghTransform);
+    connect(&hd,&houghDialog::thresholdChange,this,&MainWindow::on_thresholdChange);
+    connect(&hd,&houghDialog::LineLenChange,this,&MainWindow::on_LineLenChange);
+    connect(&hd,&houghDialog::LineGapChange,this,&MainWindow::on_LineGapChange);
+    connect(&hd,&houghDialog::minDistChange,this,&MainWindow::on_minDistChange);
+    hd.setModal(true);
+    hd.exec();
+}
+void MainWindow::on_houghTransform(bool sl,bool pl, bool m,bool c)
+{
+    lineStd_flag=sl; lineProgressive_flag=pl; mhtLine_flag=m;
+    circleHough_flag=c;
+    img_hougthTransform();
+}
+void MainWindow::on_thresholdChange(int t)
+{
+    houghThreshold=t;
+}
+void MainWindow::on_LineLenChange(int l)
+{
+    lineLen=l;
+}
+void MainWindow::on_LineGapChange(int l)
+{
+    lineGap=l;
+}
+void MainWindow::on_minDistChange(int d)
+{
+    minDistance=d;
 }

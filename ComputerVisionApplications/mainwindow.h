@@ -51,10 +51,30 @@ private slots:
     void on_edgeFilterSignal(bool);
     void on_laplacianFilterSignal(bool);
 
+    //border
+    void on_borderSignal(bool,bool,bool,bool,bool);
+    void img_border();
+
     //smoothing
     //flag,blue,median,gaussian,bilateral
     void on_smoothingSignal(bool,bool,bool,bool,bool);
     void img_smoothing();
+
+    //edge detection
+    void on_edgeDetSignal(bool,bool,bool);
+    void img_edgeDetection();
+
+    //general image transform
+    void on_imgTransformSignal(bool,QString,int,bool);
+    void img_transform();
+
+    //hough transform
+    void on_houghTransform(bool,bool,bool,bool);
+    void on_thresholdChange(int);
+    void on_LineLenChange(int);
+    void on_LineGapChange(int);
+    void on_minDistChange(int);
+    void img_hougthTransform();
 
     //pyramids
     //gaussian,laplacian,pyramid level
@@ -62,8 +82,8 @@ private slots:
     void img_pyramids();
 
     //thresholding
-    void on_thresholdingSignal(bool);
-    void on_AdpthresholdingSignal(bool);
+    void on_thresholdingSignal(bool,int);
+    void on_AdpthresholdingSignal(bool,int,int);
     void imgThreshold();
 
     void on_thresholding_pushButton_clicked();
@@ -108,12 +128,24 @@ private slots:
 
     void on_contour_pushButton_clicked();
 
+    void on_border_pushButton_clicked();
+
+    void on_edgeDet_pushButton_2_clicked();
+
+    void on_imgTransform_pushButton_clicked();
+
+    void on_hough_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     //for saving output file
     QString FileName;
 
+    //border flags
+    bool constBorderFlag, wrapBorderFlag;
+    bool refBorderFlag, ref101BorderFlag;
+    bool repBorderFlag;
     //filter flags
     bool gaussianFilter_flag;
     bool blurrFilter_flag;
@@ -129,14 +161,24 @@ private:
     //smoothing flags
     bool blurrSmooth_flag; bool medSmooth_flag;
     bool gaussSmooth_flag; bool bilatSmooth_flag;
+
+    //edge detection flags
+    bool scharr_flag, sobel_flag, laplacian_flag;
+
+    //general image transform
+    bool inpaint_flag, hist_flag;
+    QString maskStr; int inpaintMethod;
+    //hough transform
+    bool lineStd_flag,lineProgressive_flag,mhtLine_flag,circleHough_flag;
+    int houghThreshold,lineLen,lineGap,minDistance;
     //pyramids flags
     bool gauPyr_flag; bool lapPyr_flag; int pyramidLvl;
 
     //push button filter flags
     bool mbGauFilter_flag;
     //thresholding
-    bool thresholding_flag;
-    bool Adpthresholding_flag;
+    bool thresholding_flag;bool Adpthresholding_flag;
+    int thrshldVal, blocksizeVal, constvarVal;
     //morphology
     bool erosion_flag;
     bool dilation_flag;

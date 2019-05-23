@@ -17,8 +17,8 @@
    <widget class="QCheckBox" name="displayImg_checkBox">
     <property name="geometry">
      <rect>
-      <x>1090</x>
-      <y>60</y>
+      <x>1200</x>
+      <y>90</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -30,15 +30,20 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>80</y>
+      <x>160</x>
+      <y>110</y>
       <width>561</width>
-      <height>491</height>
+      <height>471</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QGraphicsView" name="inputImage_graphicsView"/>
+      <widget class="QGraphicsView" name="inputImage_graphicsView">
+       <property name="styleSheet">
+        <string notr="true">   border: 2px solid white;
+   border-radius:10px;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -77,15 +82,23 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>80</y>
+      <x>740</x>
+      <y>110</y>
       <width>561</width>
-      <height>491</height>
+      <height>471</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QGraphicsView" name="outputImage_graphicsView"/>
+      <widget class="QGraphicsView" name="outputImage_graphicsView">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">   border: 2px solid white;
+   border-radius:10px;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -124,10 +137,10 @@
    <widget class="QPushButton" name="filtering_pushButton">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>10</y>
+      <x>40</x>
+      <y>370</y>
       <width>93</width>
-      <height>28</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -169,10 +182,10 @@ JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
    <widget class="QPushButton" name="thresholding_pushButton">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>10</y>
+      <x>40</x>
+      <y>80</y>
       <width>93</width>
-      <height>28</height>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -182,10 +195,10 @@ JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
    <widget class="QPushButton" name="morphology_pushButton">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>10</y>
-      <width>111</width>
-      <height>51</height>
+      <x>30</x>
+      <y>510</y>
+      <width>109</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -196,10 +209,10 @@ Transformations</string>
    <widget class="QPushButton" name="templateMat_pushButton">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>310</x>
       <y>10</y>
-      <width>111</width>
-      <height>51</height>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -210,24 +223,26 @@ Matching</string>
    <widget class="QPushButton" name="mulTemplatemat_pushButton">
     <property name="geometry">
      <rect>
-      <x>570</x>
+      <x>420</x>
       <y>10</y>
-      <width>161</width>
-      <height>51</height>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
-     <string>Template Matching
-with Multiple Occurence</string>
+     <string>Template 
+Matching
+with Multiple
+Occurence</string>
     </property>
    </widget>
    <widget class="QPushButton" name="fDetection_pushButton">
     <property name="geometry">
      <rect>
-      <x>760</x>
+      <x>630</x>
       <y>10</y>
-      <width>91</width>
-      <height>41</height>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -238,24 +253,25 @@ Detection</string>
    <widget class="QPushButton" name="emd_pushButton">
     <property name="geometry">
      <rect>
-      <x>880</x>
+      <x>830</x>
       <y>10</y>
-      <width>151</width>
-      <height>51</height>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
      <string>Extracting and
-Matching Descriptors</string>
+Matching 
+Descriptors</string>
     </property>
    </widget>
    <widget class="QPushButton" name="smoothing_pushButton">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>40</y>
-      <width>91</width>
-      <height>25</height>
+      <x>40</x>
+      <y>150</y>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -265,10 +281,10 @@ Matching Descriptors</string>
    <widget class="QPushButton" name="pyramid_pushButton">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>40</y>
-      <width>91</width>
-      <height>25</height>
+      <x>40</x>
+      <y>430</y>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -278,10 +294,10 @@ Matching Descriptors</string>
    <widget class="QPushButton" name="edgeDet_pushButton">
     <property name="geometry">
      <rect>
-      <x>1060</x>
+      <x>1030</x>
       <y>10</y>
-      <width>80</width>
-      <height>51</height>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
@@ -292,14 +308,134 @@ Detection</string>
    <widget class="QPushButton" name="contour_pushButton">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>100</y>
-      <width>80</width>
-      <height>25</height>
+      <x>1210</x>
+      <y>10</y>
+      <width>93</width>
+      <height>66</height>
      </rect>
     </property>
     <property name="text">
      <string>Contours</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="border_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>0</y>
+      <width>93</width>
+      <height>66</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">JdkButton:hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4ro.png);
+}
+
+JdkButton:!hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton:pressed[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton[IsSelected=&quot;false&quot;][IsActive=&quot;false&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4in.png);
+}
+
+JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
+{
+	
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4se.png);
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Border 
+Extrapolation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="edgeDet_pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>220</y>
+      <width>93</width>
+      <height>66</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Edge Detection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="imgTransform_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>290</y>
+      <width>93</width>
+      <height>66</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>General
+Image 
+Transform</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hough_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>0</y>
+      <width>93</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">JdkButton:hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4ro.png);
+}
+
+JdkButton:!hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton:pressed[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton[IsSelected=&quot;false&quot;][IsActive=&quot;false&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4in.png);
+}
+
+JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
+{
+	
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4se.png);
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Hough 
+Transforms</string>
     </property>
    </widget>
    <zorder>mulTemplatemat_pushButton</zorder>
@@ -316,6 +452,10 @@ Detection</string>
    <zorder>pyramid_pushButton</zorder>
    <zorder>edgeDet_pushButton</zorder>
    <zorder>contour_pushButton</zorder>
+   <zorder>border_pushButton</zorder>
+   <zorder>edgeDet_pushButton_2</zorder>
+   <zorder>imgTransform_pushButton</zorder>
+   <zorder>hough_pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -323,7 +463,7 @@ Detection</string>
      <x>0</x>
      <y>0</y>
      <width>1327</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Image_Processing">
