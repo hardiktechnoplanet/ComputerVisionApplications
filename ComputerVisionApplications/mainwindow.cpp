@@ -18,6 +18,9 @@
 #include "imgtransformdialog.h"
 #include "houghdialog.h"
 #include "imgsegmentationdialog.h"
+#include "histogramdialog.h"
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -99,6 +102,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //image segmentation
     watershed_flag=false; grabcut_flag=false; meanshift_flag=false;
 
+    //background subtraction
+    ui->bckgrnd_pushButton->setToolTip("Zivkovic method is used. Press 'q' to quit");
+
+    //histogram
+    histogram_flag=false;
+
     //pyramids
     gauPyr_flag=false; lapPyr_flag=false;
     ui->pyramid_pushButton->setToolTip("downsample or upsample the input"
@@ -142,7 +151,7 @@ void MainWindow::on_inputImage_pushButton_clicked()
     QFile file;
     QString fileName = QFileDialog::getOpenFileName(this,
                                             tr("Open Image"),tr("C:/"),
-                                            tr("Image Files (*.png *.jpg *.bmp)"));
+                                            tr("Image Files (*.png *.jpg *.bmp *.avi)"));
     file.setFileName(fileName);
     if (file.exists())
     {
@@ -759,6 +768,101 @@ void MainWindow::img_hougthTransform()
     }
 }
 
+//histogram
+void MainWindow::img_histogram()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Select Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        Mat src, outImg;
+
+        //read the input image
+        //OpenCv uses C++ std::string class and the QT uses QString class,
+        //we need to convert the format.
+        src=imread(ui->input_lineEdit->text().toStdString());
+
+        if(histogram_flag)
+        {
+          //Separate the source image in 3 planes ( B, G and R )
+          std::vector<Mat> bgr_planes;
+          split( src, bgr_planes );
+
+          /*Start configuring histogram for each plane
+           * Establish the number of bins (256 for B,G,R)*/
+          int histSize = 256;
+
+          //Set the ranges ( for B,G,R) )
+          float range[] = { 0, 256 } ;
+          const float* histRange = { range };
+
+          //bins have same size and clear the hist in beginning
+          bool uniform = true; bool accumulate = false;
+
+          //Mat objects to save the hist's
+          Mat b_hist, g_hist, r_hist;
+
+          /*Compute the histograms:
+           * source array, no of source array, channel to be measured, mast to be used on the source
+           * array, Mat object to store the histogram, hist dimensionality, no of bins per each used dim,
+           * hist range, bine sizes are same (uniformity) and hist is cleared at the begining*/
+          calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
+          calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
+          calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
+
+          //create an image to display hist
+          // Draw the histograms for B, G and R
+          int hist_w = 512; int hist_h = 400;
+          int bin_w = cvRound( (double) hist_w/histSize );
+
+          Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
+
+          // Normalize the result to [ 0, histImage.rows ]
+          normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+          normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+          normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+
+          // Draw for each channel
+          for( int i = 1; i < histSize; i++ )
+          {
+              line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ) ,
+                               Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
+                               Scalar( 255, 0, 0), 2, 8, 0  );
+              line( histImage, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ) ,
+                               Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
+                               Scalar( 0, 255, 0), 2, 8, 0  );
+              line( histImage, Point( bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1)) ) ,
+                               Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
+                               Scalar( 0, 0, 255), 2, 8, 0  );
+          }
+          outImg=histImage.clone();
+          histogram_flag=false;
+        }
+
+        //write the filtered image to the outImg
+        imwrite(fileName.toStdString(),outImg);
+
+        //display output img using opencv
+        if(ui->displayImg_checkBox->isChecked())
+        {
+            imshow("Output Image",outImg);
+        }
+
+        //display output img using qt
+        QPixmap img = QPixmap(fileName);
+        if (!img.isNull())
+        {
+           delete ui->outputImage_graphicsView->scene();
+           ui->outputImage_graphicsView->setScene(new QGraphicsScene(ui->outputImage_graphicsView));
+           ui->outputImage_graphicsView->scene()->addPixmap(img);
+        }
+    }
+}
 //pyramids
 void MainWindow::img_pyramids()
 {
@@ -2166,7 +2270,8 @@ void MainWindow::on_segment_pushButton_clicked()
 {
     imgSegmentationDialog isd(this);
     //connection
-    connect(&isd,&imgSegmentationDialog::segmentation,this,&MainWindow::on_segmentation);
+    connect(&isd,&imgSegmentationDialog::segmentation,this,
+            &MainWindow::on_segmentation);
     isd.setModal(true);
     isd.exec();
 }
@@ -2174,4 +2279,78 @@ void MainWindow::on_segmentation(bool w,bool g, bool m)
 {
     watershed_flag=w; grabcut_flag=g; meanshift_flag=m;
     img_segmentation();
+}
+
+void MainWindow::on_hist_pushButton_clicked()
+{
+    histogramDialog hd(this);
+    //connection
+    connect(&hd,&histogramDialog::histogram,this,&MainWindow::
+            on_histogram);
+    hd.setModal(true);
+    hd.exec();
+}
+void MainWindow::on_histogram(bool h)
+{
+    histogram_flag=h;
+    img_histogram();
+}
+
+/*//////////////////////////////////Background Subtraction//////////////////////////////*/
+
+void MainWindow::on_bckgrnd_pushButton_clicked()
+{
+    //to save the ouput img
+    QString fileName=QFileDialog::getSaveFileName(this,
+                                                  "Save Output Image",
+                                                  QDir::currentPath(),
+                                                  "*.avi,*.jpg,*.png;;*.bmp");
+    if(!fileName.isEmpty())
+    {
+        ui->output_lineEdit->setText(fileName);
+        using namespace cv;
+        using namespace std;
+
+        //create Background Subtractor objects
+        Ptr<BackgroundSubtractor> BackSub;
+
+        //use the Zivkovic method
+        BackSub = createBackgroundSubtractorMOG2();
+
+        //take the input video path as a string
+        string str=ui->input_lineEdit->text().toStdString();
+        //capture the video
+        VideoCapture capture(str);
+        if (!capture.isOpened())
+        {
+           //error in opening the video input
+           cerr << "Unable to open: " << endl;
+        }
+       Mat frame, fgMask;
+       while (true)
+       {
+           capture >> frame;
+           if (frame.empty())
+           {
+               break;
+           }
+           //update the background model
+           BackSub->apply(frame, fgMask);
+           //get the frame number and write it on the current frame
+           rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
+                     cv::Scalar(255,255,255), -1);
+           stringstream ss;
+           ss << capture.get(CAP_PROP_POS_FRAMES);
+           string frameNumberString = ss.str();
+           putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
+                   FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+           //show the current frame and the fg masks
+           imshow("Frame", frame);
+           imshow("FG Mask", fgMask);
+           //get the input from the keyboard
+           int keyboard = waitKey(30);
+           if (keyboard == 'q' || keyboard == 27)
+           break;
+       }
+    }
 }

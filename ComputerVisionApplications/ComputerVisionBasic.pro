@@ -39,7 +39,8 @@ SOURCES += \
     edgedetectiondialog.cpp \
     imgtransformdialog.cpp \
     houghdialog.cpp \
-    imgsegmentationdialog.cpp
+    imgsegmentationdialog.cpp \
+    histogramdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -55,7 +56,8 @@ HEADERS += \
     edgedetectiondialog.h \
     imgtransformdialog.h \
     houghdialog.h \
-    imgsegmentationdialog.h
+    imgsegmentationdialog.h \
+    histogramdialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -71,7 +73,8 @@ FORMS += \
     edgedetectiondialog.ui \
     imgtransformdialog.ui \
     houghdialog.ui \
-    imgsegmentationdialog.ui
+    imgsegmentationdialog.ui \
+    histogramdialog.ui
 
 DISTFILES += \
     Graphics/images2.jpg

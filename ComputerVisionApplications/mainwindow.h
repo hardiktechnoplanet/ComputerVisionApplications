@@ -10,6 +10,7 @@
 #include <QCloseEvent>
 #include <QSettings>
 
+using namespace std;
 namespace Ui {
 class MainWindow;
 }
@@ -76,6 +77,10 @@ private slots:
     void on_minDistChange(int);
     void img_hougthTransform();
 
+    //histogram
+    void on_histogram(bool);
+    void img_histogram();
+
     //image segmentation
     void on_segmentation(bool,bool,bool);
     void img_segmentation();
@@ -124,6 +129,9 @@ private slots:
     void on_extractAndMatchSignal(bool,int,double,int,int,int,int);
     void imgExtractAndMatch();
 
+    //background subtraction
+
+
     void on_smoothing_pushButton_clicked();
 
     void on_pyramid_pushButton_clicked();
@@ -141,6 +149,10 @@ private slots:
     void on_hough_pushButton_clicked();
 
     void on_segment_pushButton_clicked();
+
+    void on_hist_pushButton_clicked();
+
+    void on_bckgrnd_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -179,6 +191,8 @@ private:
     int houghThreshold,lineLen,lineGap,minDistance;
     //image segmentation
     bool watershed_flag, grabcut_flag,meanshift_flag;
+    //histogram
+    bool histogram_flag;
     //pyramids flags
     bool gauPyr_flag; bool lapPyr_flag; int pyramidLvl;
 
@@ -211,6 +225,9 @@ private:
     bool extractAndMatch_flag;
     int desType,octave_no,octave_layr,diffusvty,descriptor_matcher;
     double emThreshold;
+
+    //background subtraction
+
 
 protected:
     //to prompt the user when they want to close

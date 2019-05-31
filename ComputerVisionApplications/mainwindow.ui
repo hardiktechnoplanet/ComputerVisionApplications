@@ -55,7 +55,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Select Input Image</string>
+          <string>Select Input Image or Video</string>
          </property>
         </widget>
        </item>
@@ -209,7 +209,7 @@ Transformations</string>
    <widget class="QPushButton" name="templateMat_pushButton">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>410</x>
       <y>10</y>
       <width>93</width>
       <height>66</height>
@@ -223,7 +223,7 @@ Matching</string>
    <widget class="QPushButton" name="mulTemplatemat_pushButton">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>520</x>
       <y>10</y>
       <width>93</width>
       <height>66</height>
@@ -484,6 +484,97 @@ JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
 Segmentation</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="hist_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>0</y>
+      <width>93</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">JdkButton:hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4ro.png);
+}
+
+JdkButton:!hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton:pressed[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton[IsSelected=&quot;false&quot;][IsActive=&quot;false&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4in.png);
+}
+
+JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
+{
+	
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4se.png);
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Histrogram</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="bckgrnd_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>60</y>
+      <width>93</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">JdkButton:hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4ro.png);
+}
+
+JdkButton:!hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton:pressed[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton[IsSelected=&quot;false&quot;][IsActive=&quot;false&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4in.png);
+}
+
+JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
+{
+	
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4se.png);
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Background 
+Subtraction</string>
+    </property>
+   </widget>
    <zorder>mulTemplatemat_pushButton</zorder>
    <zorder>displayImg_checkBox</zorder>
    <zorder>layoutWidget</zorder>
@@ -503,6 +594,8 @@ Segmentation</string>
    <zorder>imgTransform_pushButton</zorder>
    <zorder>hough_pushButton</zorder>
    <zorder>segment_pushButton</zorder>
+   <zorder>hist_pushButton</zorder>
+   <zorder>bckgrnd_pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
