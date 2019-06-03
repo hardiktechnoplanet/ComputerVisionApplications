@@ -210,9 +210,9 @@ Transformations</string>
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>10</y>
+      <y>0</y>
       <width>93</width>
-      <height>66</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -575,6 +575,52 @@ JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
 Subtraction</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="faceDet_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>60</y>
+      <width>93</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">JdkButton:hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4ro.png);
+}
+
+JdkButton:!hover[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton:pressed[IsSelected=&quot;false&quot;][IsActive=&quot;true&quot;]
+{
+		border-image: url(:/PluginBtn/Graphics/PluginButtons/But4av.png);
+}
+
+JdkButton[IsSelected=&quot;false&quot;][IsActive=&quot;false&quot;]
+{
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4in.png);
+}
+
+JdkButton[IsSelected=&quot;true&quot;][IsActive=&quot;true&quot;]
+{
+	
+		
+	border-image: url(:/PluginBtn/Graphics/PluginButtons/But4se.png);
+}
+</string>
+    </property>
+    <property name="text">
+     <string>Face and Eyes 
+Detection</string>
+    </property>
+   </widget>
    <zorder>mulTemplatemat_pushButton</zorder>
    <zorder>displayImg_checkBox</zorder>
    <zorder>layoutWidget</zorder>
@@ -596,6 +642,7 @@ Subtraction</string>
    <zorder>segment_pushButton</zorder>
    <zorder>hist_pushButton</zorder>
    <zorder>bckgrnd_pushButton</zorder>
+   <zorder>faceDet_pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

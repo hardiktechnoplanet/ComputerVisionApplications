@@ -129,7 +129,8 @@ private slots:
     void on_extractAndMatchSignal(bool,int,double,int,int,int,int);
     void imgExtractAndMatch();
 
-    //background subtraction
+    //face detection
+    void detectAndDisplay(cv::Mat);
 
 
     void on_smoothing_pushButton_clicked();
@@ -153,6 +154,8 @@ private slots:
     void on_hist_pushButton_clicked();
 
     void on_bckgrnd_pushButton_clicked();
+
+    void on_faceDet_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -226,8 +229,10 @@ private:
     int desType,octave_no,octave_layr,diffusvty,descriptor_matcher;
     double emThreshold;
 
-    //background subtraction
-
+    //face detection
+    string faceCascade,eyesCascade,smileCascade;
+    cv::CascadeClassifier face_cascade, eyes_cascade,smile_cascade;
+    string windowName;
 
 protected:
     //to prompt the user when they want to close

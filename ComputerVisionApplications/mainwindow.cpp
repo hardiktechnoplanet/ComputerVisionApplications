@@ -136,6 +136,13 @@ MainWindow::MainWindow(QWidget *parent) :
     extractAndMatch_flag=false;
     //edge detection
     ui->edgeDet_pushButton->setToolTip("canny edge detector");
+    //face detection
+    faceCascade="C:/dev/opencv-3.3.0/data/haarcascades/haarcascade_frontalface_alt.xml";
+    eyesCascade="C:/dev/opencv-3.3.0/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
+    smileCascade="C:/dev/opencv-3.3.0/data/haarcascades/haarcascade_smile.xml";
+    windowName="Face and Eyes Detection";
+    ui->faceDet_pushButton->setToolTip("Webcam will be started for face and eyes detection using Cascade Classifier."
+                                       "Press 'q' to stop");
 }
 
 MainWindow::~MainWindow()
@@ -2353,4 +2360,97 @@ void MainWindow::on_bckgrnd_pushButton_clicked()
            break;
        }
     }
+}
+
+/*//////////////////////////////////Face Detection//////////////////////////////*/
+void MainWindow::on_faceDet_pushButton_clicked()
+{
+    using namespace std;
+    using namespace cv;
+
+    //video capture from the webcam
+    VideoCapture capture(0);
+    Mat frame;
+
+    //load the cascades
+    if((!face_cascade.load(faceCascade)))
+    {
+        qDebug()<<"1st load fail";
+    }
+    if(!eyes_cascade.load(eyesCascade))
+    {
+        qDebug()<<"2nd load fail";
+    }
+    if(!smile_cascade.load(smileCascade))
+    {
+        qDebug()<<"3rd load fail";
+    }
+
+    while(true)
+    {
+        //put the frame from the video to the "frame"
+        capture>>frame;
+        //apply the classifier to the frame
+        if(!frame.empty())
+        {
+            detectAndDisplay(frame);
+        }
+        else
+        {
+            qDebug()<<"no frame is captured";
+            break;
+        }
+        int q=waitKey(10);
+        if((char)q=='q')
+        {
+            break;
+        }
+    }
+}
+
+void MainWindow::detectAndDisplay(cv::Mat frame)
+{
+    using namespace std; using namespace cv;
+    vector<Rect> faces;
+    Mat frame_gray;
+    //covert the frame to grayscale
+    cvtColor(frame,frame_gray,CV_BGR2GRAY);
+    //equalize the histogram (normalize the brightness and increase the contrast)
+    equalizeHist(frame_gray,frame_gray);
+
+    //face detection
+    face_cascade.detectMultiScale(frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30));
+
+    for(size_t i=0;i<faces.size();i++)
+    {
+        Point center(faces[i].x+faces[i].width*0.5,faces[i].y+faces[i].height*0.5);
+        ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+
+        Mat faceROI = frame_gray( faces[i] );
+        std::vector<Rect> eyes;
+
+        //In each face, detect eyes
+        eyes_cascade.detectMultiScale( faceROI, eyes, 1.1, 2, 0 |CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+        for( size_t j = 0; j < eyes.size(); j++ )
+        {
+           Point center( faces[i].x + eyes[j].x + eyes[j].width*0.5, faces[i].y + eyes[j].y + eyes[j].height*0.5 );
+           int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
+           circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+        }
+
+        /*std::vector<Rect> smile;
+
+        //-- In each face, detect smile
+        smile_cascade.detectMultiScale( faceROI, smile, 1.1, 2, 0 |CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+        for( size_t j = 0; j < smile.size(); j++ )
+        {
+           Point center( faces[i].x + smile[j].x + smile[j].width*0.5, faces[i].y + smile[j].y + smile[j].height*0.5 );
+           int radius = cvRound( (smile[j].width + smile[j].height)*0.25 );
+           circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+        }*/
+    }
+    //display
+    imshow(windowName, frame );
 }
