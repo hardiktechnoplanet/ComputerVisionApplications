@@ -140,7 +140,6 @@ MainWindow::MainWindow(QWidget *parent) :
     faceCascade="C:/dev/opencv-3.3.0/data/haarcascades/haarcascade_frontalface_alt.xml";
     eyesCascade="C:/dev/opencv-3.3.0/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
     smileCascade="C:/dev/opencv-3.3.0/data/haarcascades/haarcascade_smile.xml";
-    watchCascade="C:/dev/opencv-3.3.0/data/haarcascades/cascade.xml";
     windowName="Face and Eyes Detection";
     ui->faceDet_pushButton->setToolTip("Webcam will be started for face and eyes detection using Cascade Classifier."
                                        "Press 'q' to stop");
@@ -2386,10 +2385,6 @@ void MainWindow::on_faceDet_pushButton_clicked()
     {
         qDebug()<<"3rd load fail";
     }
-    if(!watch_cascade.load(watchCascade))
-    {
-        qDebug()<<"4th load fail";
-    }
 
     while(true)
     {
@@ -2417,7 +2412,6 @@ void MainWindow::detectAndDisplay(cv::Mat frame)
 {
     using namespace std; using namespace cv;
     vector<Rect> faces;
-    vector<Rect> watches;
     Mat frame_gray;
     //covert the frame to grayscale
     cvtColor(frame,frame_gray,CV_BGR2GRAY);
@@ -2426,11 +2420,11 @@ void MainWindow::detectAndDisplay(cv::Mat frame)
 
     //face detection
     face_cascade.detectMultiScale(frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30));
-    watch_cascade.detectMultiScale(frame_gray,watches,20,20);
+
     for(size_t i=0;i<faces.size();i++)
     {
         Point center(faces[i].x+faces[i].width*0.5,faces[i].y+faces[i].height*0.5);
-        ellipse( frame, center, Size( faces[i].width*0.55, faces[i].height*0.55), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+        ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
 
         Mat faceROI = frame_gray( faces[i] );
         std::vector<Rect> eyes;
@@ -2442,7 +2436,7 @@ void MainWindow::detectAndDisplay(cv::Mat frame)
         {
            Point center( faces[i].x + eyes[j].x + eyes[j].width*0.5, faces[i].y + eyes[j].y + eyes[j].height*0.5 );
            int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-           circle( frame, center, radius, Scalar( 0, 255, 0 ), 4, 8, 0 );
+           circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
         }
 
         /*std::vector<Rect> smile;
@@ -2456,11 +2450,6 @@ void MainWindow::detectAndDisplay(cv::Mat frame)
            int radius = cvRound( (smile[j].width + smile[j].height)*0.25 );
            circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
         }*/
-    }
-    for(size_t i=0;i<watches.size();i++)
-    {
-        Point center(watches[i].x+watches[i].width*0.5,watches[i].y+watches[i].height*0.5);
-        ellipse( frame, center, Size( watches[i].width*0.55, watches[i].height*0.55), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
     }
     //display
     imshow(windowName, frame );
