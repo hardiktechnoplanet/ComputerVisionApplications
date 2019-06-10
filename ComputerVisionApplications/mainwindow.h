@@ -230,8 +230,8 @@ private:
     double emThreshold;
 
     //face detection
-    string faceCascade,eyesCascade,smileCascade;
-    cv::CascadeClassifier face_cascade, eyes_cascade,smile_cascade;
+    string faceCascade,eyesCascade,smileCascade,watchCascade;
+    cv::CascadeClassifier face_cascade, eyes_cascade,smile_cascade,watch_cascade;
     string windowName;
 
 protected:
